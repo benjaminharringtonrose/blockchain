@@ -5,6 +5,7 @@ import { IPostTransactionRequest } from './types';
 import { ICurrentBlockTransactions } from 'src/types';
 import { v1 as uuidv1 } from 'uuid';
 
+const port = process.argv[2];
 const nodeAddress = uuidv1().split('-').join('');
 
 const coin = new Blockchain();
@@ -55,6 +56,6 @@ app.get('/mine', function (_, res) {
   });
 });
 
-app.listen(3000, function () {
-  console.log('Listening on port 3000...');
+app.listen(port, function () {
+  console.log(`Listening on port ${port}...`);
 });
