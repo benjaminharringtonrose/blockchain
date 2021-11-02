@@ -1,12 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { Blockchain } from '../blockchain';
-import {
-  IGetBlockchainRequest,
-  IPostMineRequest,
-  IPostTransactionRequest,
-} from './types';
-import { ICreateNewTransaction, ICurrentBlockTransactions } from 'src/types';
+import { IPostTransactionRequest } from './types';
+import { ICurrentBlockTransactions } from 'src/types';
 import { v1 as uuidv1 } from 'uuid';
 
 const nodeAddress = uuidv1().split('-').join('');

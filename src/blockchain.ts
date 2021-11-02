@@ -3,7 +3,6 @@ import {
   IBlock,
   ICreateNewBlock,
   ICreateNewTransaction,
-  ICurrentBlockTransactions,
   IHashBlock,
   IProofOfWork,
   ITransaction,
