@@ -20,11 +20,16 @@ export interface ITransaction extends ICreateNewTransaction {}
 
 export interface IHashBlock {
   previousBlockHash: string;
-  currentBlockTransactions: ICreateNewTransaction[];
+  currentBlockTransactions: ICurrentBlockTransactions;
   nonce: number;
 }
 
 export interface IProofOfWork {
   previousBlockHash: string;
-  currentBlockTransactions: ICreateNewTransaction[];
+  currentBlockTransactions: ICurrentBlockTransactions;
+}
+
+export interface ICurrentBlockTransactions {
+  transactions: ITransaction[];
+  index: number;
 }

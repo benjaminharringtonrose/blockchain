@@ -1,5 +1,5 @@
 import { Blockchain } from './blockchain';
 
-const babecoin = new Blockchain();
+const coin = new Blockchain();
 
-console.log(babecoin);
+console.log(coin);

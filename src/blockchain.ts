@@ -3,14 +3,15 @@ import {
   IBlock,
   ICreateNewBlock,
   ICreateNewTransaction,
+  ICurrentBlockTransactions,
   IHashBlock,
   IProofOfWork,
   ITransaction,
-} from './models';
+} from './types';
 
 export class Blockchain {
-  private chain: IBlock[];
-  private pendingTransactions: ITransaction[];
+  public chain: IBlock[];
+  public pendingTransactions: ITransaction[];
 
   public constructor() {
     this.chain = [];
