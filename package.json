@@ -1,0 +1,25 @@
+{
+  "name": "blockchain",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/api.ts",
+  "scripts": {
+    "start": "nodemon --watch src -e ts src/api.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/sha": "^3.0.1",
+    "express": "^4.17.1",
+    "js-sha256": "^0.9.0",
+    "nodemon": "^2.0.14"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.2",
+    "jest": "^27.3.1",
+    "ts-node-dev": "^1.1.8",
+    "tsconfig-paths": "^3.11.0",
+    "typescript": "^4.4.4"
+  }
+}
