@@ -89,7 +89,6 @@ export class Blockchain {
         currentBlockTransactions,
         nonce,
       });
-      console.log(hash);
     }
     return nonce;
   }

@@ -7,6 +7,9 @@ import {
   IPostTransactionRequest,
 } from './types';
 import { ICreateNewTransaction, ICurrentBlockTransactions } from 'src/types';
+import { v1 as uuidv1 } from 'uuid';
+
+const nodeAddress = uuidv1().split('-').join('');
 
 const coin = new Blockchain();
 
@@ -18,19 +21,17 @@ app.use(
   })
 );
 
-app.get('/blockchain', function (req, res) {
+app.get('/blockchain', function (_, res) {
   res.send(coin);
 });
 
 app.post('/transaction', function (req, res) {
-  let requestBody: IPostTransactionRequest = req.body;
+  const requestBody: IPostTransactionRequest = req.body;
   const blockIndex = coin.createNewTransaction(requestBody);
   res.json({ note: `Transaction will be added in block ${blockIndex}.` });
 });
 
-app.post('/mine', function (req, res) {
-  let requestBody: IPostMineRequest = req.body;
-  res.send('Not implemented.');
+app.get('/mine', function (_, res) {
   const lastBlock = coin.getLastBlock();
   const previousBlockHash = lastBlock.hash;
   const currentBlockTransactions: ICurrentBlockTransactions = {
@@ -41,7 +42,21 @@ app.post('/mine', function (req, res) {
     previousBlockHash,
     currentBlockTransactions,
   });
-  // const newBlock = coin.createNewBlock({});
+  const hash = coin.hashBlock({
+    previousBlockHash,
+    currentBlockTransactions,
+    nonce,
+  });
+  coin.createNewTransaction({
+    amount: 12.5,
+    sender: '00',
+    recipient: nodeAddress,
+  });
+  const block = coin.createNewBlock({ nonce, hash, previousBlockHash });
+  res.json({
+    note: 'New block mined successfully',
+    block,
+  });
 });
 
 app.listen(3000, function () {
