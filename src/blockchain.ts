@@ -1,4 +1,6 @@
 import { sha256 } from 'js-sha256';
+import { v1 as uuidv1 } from 'uuid';
+
 import {
   IBlock,
   ICreateNewBlock,
@@ -23,7 +25,6 @@ export class Blockchain {
 
     this.currentNodeUrl = currentNodeUrl;
 
-    console.log(currentNodeUrl);
     this.networkNodes = [];
 
     this.createNewBlock({ nonce: 100, hash: '0', previousBlockHash: '0' });
@@ -55,14 +56,21 @@ export class Blockchain {
     amount,
     sender,
     recipient,
-  }: ICreateNewTransaction): number {
-    const newTransaction: ITransaction = {
+  }: ICreateNewTransaction) {
+    const newTransaction = {
       amount,
       sender,
       recipient,
+      transactionId: uuidv1().split('-').join(''),
     };
-    this.pendingTransactions.push(newTransaction);
-    return this.getLastBlock()['index'] + 1;
+    return newTransaction;
+  }
+
+  public addTransactionToPendingTransactions(
+    transaction: ICreateNewTransaction
+  ) {
+    this.pendingTransactions.push(transaction);
+    return this.getLastBlock().index + 1;
   }
 
   public hashBlock({

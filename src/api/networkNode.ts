@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { Blockchain } from '../blockchain';
-import { IPostTransactionRequest } from './types';
 import { ICurrentBlockTransactions } from 'src/types';
 import { v1 as uuidv1 } from 'uuid';
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
@@ -24,9 +23,31 @@ app.get('/blockchain', function (_, res) {
 });
 
 app.post('/transaction', function (req, res) {
-  const requestBody: IPostTransactionRequest = req.body;
-  const blockIndex = coin.createNewTransaction(requestBody);
-  res.json({ note: `Transaction will be added in block ${blockIndex}.` });
+  const newTransaction = req.body;
+  const blockIndex = coin.addTransactionToPendingTransactions(newTransaction);
+  res.json({ note: `Transaction will be added in block ${blockIndex}` });
+});
+
+app.post('/transaction/broadcast', function (req, res) {
+  const newTransaction = coin.createNewTransaction({
+    amount: req.body.amount,
+    sender: req.body.sender,
+    recipient: req.body.recipient,
+  });
+  coin.addTransactionToPendingTransactions(newTransaction);
+
+  const requestPromises: AxiosPromise<any>[] = [];
+  coin.networkNodes.forEach((networkNodeUrl) => {
+    const requestOptions: AxiosRequestConfig = {
+      method: 'post',
+      url: networkNodeUrl + '/transaction',
+      data: newTransaction,
+    };
+    requestPromises.push(axios(requestOptions));
+  });
+  Promise.all(requestPromises).then((_) => {
+    res.json({ note: 'Transaction created and broadcasted successfully.' });
+  });
 });
 
 app.get('/mine', function (_, res) {
@@ -61,7 +82,8 @@ app.get('/mine', function (_, res) {
 app.post('/register-and-broadcast-node', function (req, res) {
   const newNodeUrl = req.body.newNodeUrl;
   const nodeNotAlreadyPresent = coin.networkNodes.indexOf(newNodeUrl) === -1;
-  if (nodeNotAlreadyPresent) {
+  const notCurrentNode = coin.currentNodeUrl !== newNodeUrl;
+  if (nodeNotAlreadyPresent && notCurrentNode) {
     coin.networkNodes.push(newNodeUrl);
   }
 
