@@ -8,13 +8,24 @@ import {
   ITransaction,
 } from './types';
 
+const currentNodeUrl = process.argv[3];
+
 export class Blockchain {
   public chain: IBlock[];
   public pendingTransactions: ITransaction[];
 
+  public currentNodeUrl: string;
+  public networkNodes: string[];
+
   public constructor() {
     this.chain = [];
     this.pendingTransactions = [];
+
+    this.currentNodeUrl = currentNodeUrl;
+
+    console.log(currentNodeUrl);
+    this.networkNodes = [];
+
     this.createNewBlock({ nonce: 100, hash: '0', previousBlockHash: '0' });
   }
 
