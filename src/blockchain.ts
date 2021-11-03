@@ -110,8 +110,8 @@ export class Blockchain {
   public chainIsValid(blockchain: IBlock[]) {
     let validChain = true;
     for (let i = 1; i < blockchain.length; i++) {
-      const currentBlock = blockchain[i];
       const prevBlock = blockchain[i - 1];
+      const currentBlock = blockchain[i];
       const blockHash = this.hashBlock({
         previousBlockHash: prevBlock.hash,
         currentBlockTransactions: {
