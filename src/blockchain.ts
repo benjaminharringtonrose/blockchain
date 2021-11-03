@@ -90,10 +90,6 @@ export class Blockchain {
     previousBlockHash,
     currentBlockTransactions,
   }: IProofOfWork) {
-    // this function will repeatedly hash block until it finds the correct hash => '0000OIANSDFUI08N9AS'
-    // uses current block data for the hash, but also the previousBlockHash
-    // continuously changes nonce value until it finds the correct hash
-    // returns to us the nonce value that creates the correct hash
     let nonce = 0;
     let hash = this.hashBlock({
       previousBlockHash,
@@ -133,7 +129,6 @@ export class Blockchain {
         break;
       }
     }
-    // validate genesis block
     const genesisBlock = blockchain[0];
     const correctNonce = genesisBlock.nonce === 100;
     const correctPreviousBlockHash = genesisBlock.previousBlockHash === '0';

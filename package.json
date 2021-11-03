@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/api.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nodemon --watch src -e ts src/index.ts",
     "node_1": "nodemon --watch src -e ts src/api/networkNode.ts 3001 http://localhost:3001",
     "node_2": "nodemon --watch src -e ts src/api/networkNode.ts 3002 http://localhost:3002",
     "node_3": "nodemon --watch src -e ts src/api/networkNode.ts 3003 http://localhost:3003",

@@ -55,7 +55,7 @@ app.get('/mine', async function (_, res) {
   const previousBlockHash = lastBlock.hash;
   const currentBlockTransactions: ICurrentBlockTransactions = {
     transactions: coin.pendingTransactions,
-    index: lastBlock.index,
+    index: lastBlock.index + 1,
   };
   const nonce = coin.proofOfWork({
     previousBlockHash,
