@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { Blockchain } from '../blockchain';
-import { ICurrentBlockTransactions } from 'src/types';
+import { IBlock, ICurrentBlockTransactions } from 'src/types';
 import { v1 as uuidv1 } from 'uuid';
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
 
@@ -50,7 +50,7 @@ app.post('/transaction/broadcast', function (req, res) {
   });
 });
 
-app.get('/mine', function (_, res) {
+app.get('/mine', async function (_, res) {
   const lastBlock = coin.getLastBlock();
   const previousBlockHash = lastBlock.hash;
   const currentBlockTransactions: ICurrentBlockTransactions = {
@@ -66,16 +66,51 @@ app.get('/mine', function (_, res) {
     currentBlockTransactions,
     nonce,
   });
-  coin.createNewTransaction({
-    amount: 12.5,
-    sender: '00',
-    recipient: nodeAddress,
+
+  const newBlock = coin.createNewBlock({ nonce, hash, previousBlockHash });
+
+  const requestPromises: AxiosPromise[] = [];
+  coin.networkNodes.forEach((networkNodeUrl) => {
+    const requestOptions: AxiosRequestConfig<any> = {
+      method: 'post',
+      url: networkNodeUrl + '/receive-new-block',
+      data: { newBlock },
+    };
+    requestPromises.push(axios(requestOptions));
   });
-  const block = coin.createNewBlock({ nonce, hash, previousBlockHash });
+
+  await Promise.all(requestPromises);
+
+  const requestOptions: AxiosRequestConfig<any> = {
+    method: 'post',
+    url: coin.currentNodeUrl + '/transaction/broadcast',
+    data: {
+      amount: 12.5,
+      sender: '00',
+      recipient: nodeAddress,
+    },
+  };
+
+  await axios(requestOptions);
+
   res.json({
-    note: 'New block mined successfully',
-    block,
+    note: 'New block mined & broadcasted successfully',
+    block: newBlock,
   });
+});
+
+app.post('/receive-new-block', function (req, res) {
+  const newBlock: IBlock = req.body.newBlock;
+  const lastBlock = coin.getLastBlock();
+  const correctHash = lastBlock.hash === newBlock.previousBlockHash;
+  const correctIndex = lastBlock.index + 1 === newBlock.index;
+  if (correctHash && correctIndex) {
+    coin.chain.push(newBlock);
+    coin.pendingTransactions = [];
+    res.json({ note: 'New block received and accepted.', newBlock });
+  } else {
+    res.json({ note: 'New block rejected.', newBlock });
+  }
 });
 
 // register a node and broadcast it to the entire network
