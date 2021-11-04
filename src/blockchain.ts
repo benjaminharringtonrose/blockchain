@@ -22,11 +22,8 @@ export class Blockchain {
   public constructor() {
     this.chain = [];
     this.pendingTransactions = [];
-
     this.currentNodeUrl = currentNodeUrl;
-
     this.networkNodes = [];
-
     this.createNewBlock({ nonce: 100, hash: '0', previousBlockHash: '0' });
   }
 

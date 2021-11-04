@@ -71,7 +71,7 @@ app.get('/mine', async function (_, res) {
 
   const requestPromises: AxiosPromise[] = [];
   coin.networkNodes.forEach((networkNodeUrl) => {
-    const requestOptions: AxiosRequestConfig<any> = {
+    const requestOptions: AxiosRequestConfig = {
       method: 'post',
       url: networkNodeUrl + '/receive-new-block',
       data: { newBlock },
@@ -81,7 +81,7 @@ app.get('/mine', async function (_, res) {
 
   await Promise.all(requestPromises);
 
-  const requestOptions: AxiosRequestConfig<any> = {
+  const requestOptions: AxiosRequestConfig = {
     method: 'post',
     url: coin.currentNodeUrl + '/transaction/broadcast',
     data: {
@@ -133,7 +133,7 @@ app.post('/register-and-broadcast-node', function (req, res) {
   });
 
   Promise.all(registerNodesPromises)
-    .then((data) => {
+    .then((_) => {
       const bulkRegisterOptions: AxiosRequestConfig = {
         method: 'post',
         url: newNodeUrl + '/register-nodes-bulk',
