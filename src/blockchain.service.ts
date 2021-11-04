@@ -32,7 +32,7 @@ export class BlockchainService {
     this.coin.networkNodes.forEach((networkNodeUrl) => {
       const requestOptions: AxiosRequestConfig = {
         method: 'post',
-        url: networkNodeUrl + '/transaction',
+        url: networkNodeUrl + '/blockchain/transaction',
         data: newTransaction,
       };
       requestPromises.push(axios(requestOptions));
@@ -61,7 +61,7 @@ export class BlockchainService {
     this.coin.networkNodes.forEach((networkNodeUrl) => {
       const requestOptions: AxiosRequestConfig = {
         method: 'post',
-        url: networkNodeUrl + '/receive-new-block',
+        url: networkNodeUrl + '/blockchain/receive-new-block',
         data: { newBlock },
       };
       requestPromises.push(axios(requestOptions));
@@ -69,7 +69,7 @@ export class BlockchainService {
     await Promise.all(requestPromises);
     const requestOptions: AxiosRequestConfig = {
       method: 'post',
-      url: this.coin.currentNodeUrl + '/transaction/broadcast',
+      url: this.coin.currentNodeUrl + '/blockchain/transaction/broadcast',
       data: {
         amount: 12.5,
         sender: '00',

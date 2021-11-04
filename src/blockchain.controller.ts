@@ -23,8 +23,8 @@ export class BlockchainController {
   @httpPost('/transaction/broadcast')
   async postAndBroadcastTransaction(req: Request, res: Response) {
     const newTransaction: ICreateNewTransaction = req.body;
-    const blockIndex = await this._service.postAndBroadcastTransaction(newTransaction);
-    res.json({ note: `Transaction will be added in block ${blockIndex}` });
+    await this._service.postAndBroadcastTransaction(newTransaction);
+    res.json({ note: 'Transaction created and broadcasted successfully.' });
   }
 
   @httpGet('/mine')
