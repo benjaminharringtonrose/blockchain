@@ -1,7 +1,6 @@
 import { Container } from 'inversify';
-import { BlockchainController } from '../blockchain.controller';
-import { BlockchainRepository } from '../blockchain.repository';
-import { BlockchainService } from '../blockchain.service';
+import { BlockchainController } from './blockchain.controller';
+import { BlockchainService } from './blockchain.service';
 
 export const container = new Container({
   defaultScope: 'Singleton',

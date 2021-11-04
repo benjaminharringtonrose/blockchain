@@ -1,5 +1,5 @@
 import { sha256 } from 'js-sha256';
-import { Blockchain } from './blockchain';
+import { Blockchain } from './api/blockchain';
 const coin = new Blockchain();
 
 const bc1 = {

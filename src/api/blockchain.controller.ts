@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { controller, httpGet, httpPost } from 'inversify-express-utils';
 import { BlockchainService } from './blockchain.service';
-import { IBlock, ICreateNewTransaction } from './types';
+import { IBlock, ICreateNewTransaction } from '../types';
 
 @controller('/blockchain')
 export class BlockchainController {

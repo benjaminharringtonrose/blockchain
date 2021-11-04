@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { Blockchain } from '../blockchain';
+import { Blockchain } from '../api/blockchain';
 import { IBlock, ICreateNewTransaction, ICurrentBlockTransactions, ITransaction } from 'src/types';
 import { v1 as uuidv1 } from 'uuid';
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';

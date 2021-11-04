@@ -1,8 +1,8 @@
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
 import { injectable } from 'inversify';
-import { nodeAddress } from './api/bootstrap';
+import { nodeAddress } from '../bootstrap';
 import { Blockchain } from './blockchain';
-import { IBlock, ICreateNewTransaction, ICurrentBlockTransactions, ITransaction } from './types';
+import { IBlock, ICreateNewTransaction, ICurrentBlockTransactions, ITransaction } from '../types';
 
 export enum NewBlock {
   accepted = 'accepted',

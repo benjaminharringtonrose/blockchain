@@ -8,7 +8,7 @@ import {
   IHashBlock,
   IProofOfWork,
   ITransaction,
-} from './types';
+} from '../types';
 
 const currentNodeUrl = process.argv[3];
 

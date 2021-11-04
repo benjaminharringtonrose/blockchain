@@ -4,7 +4,7 @@ import express from 'express';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import { v1 as uuidv1 } from 'uuid';
 
-import { container } from './container';
+import { container } from './api/container';
 
 const port = process.argv[2];
 export const nodeAddress = uuidv1().split('-').join('');
