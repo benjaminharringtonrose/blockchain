@@ -12,7 +12,7 @@ import {
 
 const currentNodeUrl = process.argv[3];
 
-export class Blockchain {
+export class BlockchainRepository {
   public chain: IBlock[];
   public pendingTransactions: ITransaction[];
 

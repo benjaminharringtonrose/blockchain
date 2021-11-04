@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { Blockchain } from '../blockchain';
-import { IBlock, ICurrentBlockTransactions } from 'src/types';
+import { IBlock, ICreateNewTransaction, ICurrentBlockTransactions, ITransaction } from 'src/types';
 import { v1 as uuidv1 } from 'uuid';
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
 
@@ -18,17 +18,17 @@ app.use(
   })
 );
 
-app.get('/blockchain', function (_, res) {
+app.get('/blockchain', function (_: Request, res: Response) {
   res.send(coin);
 });
 
-app.post('/transaction', function (req, res) {
-  const newTransaction = req.body;
+app.post('/blockchain/transaction', function (req: Request, res: Response) {
+  const newTransaction: ICreateNewTransaction = req.body;
   const blockIndex = coin.addTransactionToPendingTransactions(newTransaction);
   res.json({ note: `Transaction will be added in block ${blockIndex}` });
 });
 
-app.post('/transaction/broadcast', function (req, res) {
+app.post('/blockchain/transaction/broadcast', async function (req: Request, res: Response) {
   const newTransaction = coin.createNewTransaction({
     amount: req.body.amount,
     sender: req.body.sender,
@@ -36,11 +36,11 @@ app.post('/transaction/broadcast', function (req, res) {
   });
   coin.addTransactionToPendingTransactions(newTransaction);
 
-  const requestPromises: AxiosPromise<any>[] = [];
+  const requestPromises: AxiosPromise[] = [];
   coin.networkNodes.forEach((networkNodeUrl) => {
     const requestOptions: AxiosRequestConfig = {
       method: 'post',
-      url: networkNodeUrl + '/transaction',
+      url: networkNodeUrl + '/blockchain/transaction',
       data: newTransaction,
     };
     requestPromises.push(axios(requestOptions));
@@ -50,7 +50,7 @@ app.post('/transaction/broadcast', function (req, res) {
   });
 });
 
-app.get('/mine', async function (_, res) {
+app.get('/blockchain/mine', async function (_: Request, res: Response) {
   const lastBlock = coin.getLastBlock();
   const previousBlockHash = lastBlock.hash;
   const currentBlockTransactions: ICurrentBlockTransactions = {
@@ -73,7 +73,7 @@ app.get('/mine', async function (_, res) {
   coin.networkNodes.forEach((networkNodeUrl) => {
     const requestOptions: AxiosRequestConfig = {
       method: 'post',
-      url: networkNodeUrl + '/receive-new-block',
+      url: networkNodeUrl + '/blockchain/receive-new-block',
       data: { newBlock },
     };
     requestPromises.push(axios(requestOptions));
@@ -83,7 +83,7 @@ app.get('/mine', async function (_, res) {
 
   const requestOptions: AxiosRequestConfig = {
     method: 'post',
-    url: coin.currentNodeUrl + '/transaction/broadcast',
+    url: coin.currentNodeUrl + '/blockchain/transaction/broadcast',
     data: {
       amount: 12.5,
       sender: '00',
@@ -99,7 +99,7 @@ app.get('/mine', async function (_, res) {
   });
 });
 
-app.post('/receive-new-block', function (req, res) {
+app.post('/blockchain/receive-new-block', function (req: Request, res: Response) {
   const newBlock: IBlock = req.body.newBlock;
   const lastBlock = coin.getLastBlock();
   const correctHash = lastBlock.hash === newBlock.previousBlockHash;
@@ -114,7 +114,7 @@ app.post('/receive-new-block', function (req, res) {
 });
 
 // register a node and broadcast it to the entire network
-app.post('/register-and-broadcast-node', function (req, res) {
+app.post('/blockchain/register-and-broadcast-node', function (req: Request, res: Response) {
   const newNodeUrl = req.body.newNodeUrl;
   const nodeNotAlreadyPresent = coin.networkNodes.indexOf(newNodeUrl) === -1;
   const notCurrentNode = coin.currentNodeUrl !== newNodeUrl;
@@ -122,11 +122,11 @@ app.post('/register-and-broadcast-node', function (req, res) {
     coin.networkNodes.push(newNodeUrl);
   }
 
-  const registerNodesPromises: AxiosPromise<any>[] = [];
+  const registerNodesPromises: AxiosPromise[] = [];
   coin.networkNodes.forEach((networkNodeUrl) => {
     const requestOptions: AxiosRequestConfig = {
       method: 'post',
-      url: networkNodeUrl + '/register-node',
+      url: networkNodeUrl + '/blockchain/register-node',
       data: { newNodeUrl },
     };
     registerNodesPromises.push(axios(requestOptions));
@@ -136,7 +136,7 @@ app.post('/register-and-broadcast-node', function (req, res) {
     .then((_) => {
       const bulkRegisterOptions: AxiosRequestConfig = {
         method: 'post',
-        url: newNodeUrl + '/register-nodes-bulk',
+        url: newNodeUrl + '/blockchain/register-nodes-bulk',
         data: { allNetworkNodes: [...coin.networkNodes, coin.currentNodeUrl] },
       };
       return axios(bulkRegisterOptions);
@@ -148,7 +148,7 @@ app.post('/register-and-broadcast-node', function (req, res) {
 });
 
 // register a node with the network
-app.post('/register-node', function (req, res) {
+app.post('/blockchain/register-node', function (req: Request, res: Response) {
   const newNodeUrl: string = req.body.newNodeUrl;
   const nodeNotAlreadyPresent = coin.networkNodes.indexOf(newNodeUrl) === -1;
   const notCurrentNode = coin.currentNodeUrl !== newNodeUrl;
@@ -159,17 +159,57 @@ app.post('/register-node', function (req, res) {
 });
 
 // register multiple nodes at once
-app.post('/register-nodes-bulk', function (req, res) {
+app.post('/blockchain/register-nodes-bulk', function (req: Request, res: Response) {
   const allNetworkNodes: string[] = req.body.allNetworkNodes;
   allNetworkNodes.forEach((networkNodeUrl) => {
-    const nodeNotAlreadyPresent =
-      coin.networkNodes.indexOf(networkNodeUrl) === -1;
+    const nodeNotPresent = coin.networkNodes.indexOf(networkNodeUrl) === -1;
     const notCurrentNode = coin.currentNodeUrl !== networkNodeUrl;
-    if (nodeNotAlreadyPresent && notCurrentNode) {
+    if (nodeNotPresent && notCurrentNode) {
       coin.networkNodes.push(networkNodeUrl);
     }
   });
   res.json({ note: 'Bulk registration successful.' });
+});
+
+app.get('/blockchain/consensus', function (_: Request, res: Response) {
+  const requestPromises: AxiosPromise[] = [];
+  coin.networkNodes.forEach((networkNodeUrl) => {
+    const requestOptions: AxiosRequestConfig = {
+      method: 'get',
+      url: networkNodeUrl + '/blockchain',
+    };
+    requestPromises.push(axios(requestOptions));
+  });
+  Promise.all(requestPromises).then((blockchains) => {
+    const currentChainLength = coin.chain.length;
+    let maxChainLength = currentChainLength;
+    let newLongestChain = null;
+    let newPendingTransactions: ITransaction[] = [];
+
+    blockchains.forEach((response) => {
+      const blockchain = response.data;
+      if (blockchain.chain.length > maxChainLength) {
+        maxChainLength = blockchain.chain.length;
+        newLongestChain = blockchain.chain;
+        newPendingTransactions = blockchain.pendingTransactions;
+      }
+    });
+
+    if (!newLongestChain || (newLongestChain && !coin.chainIsValid(newLongestChain))) {
+      res.json({
+        note: 'Current chain has not been replaced.',
+        chain: coin.chain,
+      });
+    } else {
+      // there's a new longest chain and it's valid
+      coin.chain = newLongestChain;
+      coin.pendingTransactions = newPendingTransactions;
+      res.json({
+        note: 'This chain has been replaced.',
+        chain: coin.chain,
+      });
+    }
+  });
 });
 
 app.listen(port, function () {
