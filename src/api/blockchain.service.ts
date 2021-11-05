@@ -20,12 +20,12 @@ export class BlockchainService {
     return this.coin;
   }
 
-  public postTransaction({ amount, sender, recipient }: ICreateNewTransaction) {
+  public addTransactionToPendingTransactions({ amount, sender, recipient }: ICreateNewTransaction) {
     const blockIndex = this.coin.addTransactionToPendingTransactions({ amount, sender, recipient });
     return blockIndex;
   }
 
-  public async postAndBroadcastTransaction({ amount, sender, recipient }: ICreateNewTransaction) {
+  public async addAndBroadcastTransaction({ amount, sender, recipient }: ICreateNewTransaction) {
     const newTransaction = this.coin.createNewTransaction({ amount, sender, recipient });
     this.coin.addTransactionToPendingTransactions(newTransaction);
     const requestPromises: AxiosPromise[] = [];
@@ -40,7 +40,7 @@ export class BlockchainService {
     return await Promise.all(requestPromises);
   }
 
-  public async mine() {
+  public async mineNewBlock() {
     const lastBlock = this.coin.getLastBlock();
     const previousBlockHash = lastBlock.hash;
     const currentBlockTransactions: ICurrentBlockTransactions = {
@@ -127,7 +127,7 @@ export class BlockchainService {
     }
   }
 
-  public registerNode({ newNodeUrl }: { newNodeUrl: string }) {
+  public registerNewNode({ newNodeUrl }: { newNodeUrl: string }) {
     const nodeNotAlreadyPresent = this.coin.networkNodes.indexOf(newNodeUrl) === -1;
     const notCurrentNode = this.coin.currentNodeUrl !== newNodeUrl;
     if (nodeNotAlreadyPresent && notCurrentNode) {
@@ -145,9 +145,7 @@ export class BlockchainService {
     });
   }
 
-  public consensus() {
-    let note = '';
-    let chain: IBlock[] = [];
+  public async getConsensus() {
     const requestPromises: AxiosPromise[] = [];
     this.coin.networkNodes.forEach((networkNodeUrl) => {
       const requestOptions: AxiosRequestConfig = {
@@ -156,30 +154,31 @@ export class BlockchainService {
       };
       requestPromises.push(axios(requestOptions));
     });
-    Promise.all(requestPromises).then((blockchains) => {
-      const currentChainLength = this.coin.chain.length;
-      let maxChainLength = currentChainLength;
-      let newLongestChain = null;
-      let newPendingTransactions: ITransaction[] = [];
-      blockchains.forEach((response) => {
-        const blockchain = response.data;
-        if (blockchain.chain.length > maxChainLength) {
-          maxChainLength = blockchain.chain.length;
-          newLongestChain = blockchain.chain;
-          newPendingTransactions = blockchain.pendingTransactions;
-        }
-      });
-      if (!newLongestChain || (newLongestChain && !this.coin.chainIsValid(newLongestChain))) {
-        note = 'Current chain has not been replaced.';
-        chain = this.coin.chain;
-      } else {
-        // new longest chain and valid
-        this.coin.chain = newLongestChain;
-        this.coin.pendingTransactions = newPendingTransactions;
-        note = 'This chain has been replaced.';
-        chain = this.coin.chain;
+    const blockchains = await Promise.all(requestPromises);
+    const currentChainLength = this.coin.chain.length;
+    let maxChainLength = currentChainLength;
+    let newLongestChain = null;
+    let newPendingTransactions: ITransaction[] = [];
+    blockchains.forEach((response) => {
+      const blockchain = response.data;
+      if (blockchain.chain.length > maxChainLength) {
+        maxChainLength = blockchain.chain.length;
+        newLongestChain = blockchain.chain;
+        newPendingTransactions = blockchain.pendingTransactions;
       }
     });
-    return { note, chain };
+    if (!newLongestChain || (newLongestChain && !this.coin.chainIsValid(newLongestChain))) {
+      return {
+        note: 'Current chain has not been replaced.',
+        chain: this.coin.chain,
+      };
+    } else {
+      this.coin.chain = newLongestChain;
+      this.coin.pendingTransactions = newPendingTransactions;
+      return {
+        note: 'This chain has been replaced.',
+        chain: this.coin.chain,
+      };
+    }
   }
 }

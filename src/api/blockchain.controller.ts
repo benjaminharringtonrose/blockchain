@@ -8,28 +8,28 @@ export class BlockchainController {
   constructor(private readonly _service: BlockchainService) {}
 
   @httpGet('/')
-  blockchain(_: Request, res: Response) {
+  getBlockchain(_: Request, res: Response) {
     const coin = this._service.getBlockchain();
     res.send(coin);
   }
 
   @httpPost('/transaction')
-  postTransaction(req: Request, res: Response) {
+  addTransactionToPendingTransactions(req: Request, res: Response) {
     const newTransaction: ICreateNewTransaction = req.body;
-    const blockIndex = this._service.postTransaction(newTransaction);
+    const blockIndex = this._service.addTransactionToPendingTransactions(newTransaction);
     res.json({ note: `Transaction will be added in block ${blockIndex}` });
   }
 
   @httpPost('/transaction/broadcast')
-  async postAndBroadcastTransaction(req: Request, res: Response) {
+  async addAndBroadcastTransaction(req: Request, res: Response) {
     const newTransaction: ICreateNewTransaction = req.body;
-    await this._service.postAndBroadcastTransaction(newTransaction);
+    await this._service.addAndBroadcastTransaction(newTransaction);
     res.json({ note: 'Transaction created and broadcasted successfully.' });
   }
 
   @httpGet('/mine')
-  async mine(_: Request, res: Response) {
-    const newBlock = await this._service.mine();
+  async mineNewBlock(_: Request, res: Response) {
+    const newBlock = await this._service.mineNewBlock();
     res.json({ note: 'New block mined & broadcasted successfully', block: newBlock });
   }
 
@@ -52,9 +52,9 @@ export class BlockchainController {
   }
 
   @httpPost('/register-node')
-  registerNode(req: Request, res: Response) {
+  registerNewNode(req: Request, res: Response) {
     const newNodeUrl: string = req.body.newNodeUrl;
-    this._service.registerNode({ newNodeUrl });
+    this._service.registerNewNode({ newNodeUrl });
     res.json({ note: 'New node registered successfully.' });
   }
 
@@ -66,8 +66,8 @@ export class BlockchainController {
   }
 
   @httpGet('/consensus')
-  async consensus(_: Request, res: Response) {
-    const { note, chain } = this._service.consensus();
+  async getConsensus(_: Request, res: Response) {
+    const { note, chain } = await this._service.getConsensus();
     res.json({ note, chain });
   }
 }
