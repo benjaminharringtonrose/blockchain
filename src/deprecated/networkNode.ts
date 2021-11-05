@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { Blockchain } from '../api/blockchain';
+import { Blockchain } from '../api/Blockchain';
 import { IBlock, ICreateNewTransaction, ICurrentBlockTransactions, ITransaction } from 'src/types';
 import { v1 as uuidv1 } from 'uuid';
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
@@ -35,7 +35,6 @@ app.post('/blockchain/transaction/broadcast', async function (req: Request, res:
     recipient: req.body.recipient,
   });
   coin.addTransactionToPendingTransactions(newTransaction);
-
   const requestPromises: AxiosPromise[] = [];
   coin.networkNodes.forEach((networkNodeUrl) => {
     const requestOptions: AxiosRequestConfig = {
@@ -66,9 +65,7 @@ app.get('/blockchain/mine', async function (_: Request, res: Response) {
     currentBlockTransactions,
     nonce,
   });
-
   const newBlock = coin.createNewBlock({ nonce, hash, previousBlockHash });
-
   const requestPromises: AxiosPromise[] = [];
   coin.networkNodes.forEach((networkNodeUrl) => {
     const requestOptions: AxiosRequestConfig = {
@@ -78,9 +75,7 @@ app.get('/blockchain/mine', async function (_: Request, res: Response) {
     };
     requestPromises.push(axios(requestOptions));
   });
-
   await Promise.all(requestPromises);
-
   const requestOptions: AxiosRequestConfig = {
     method: 'post',
     url: coin.currentNodeUrl + '/blockchain/transaction/broadcast',
@@ -90,9 +85,7 @@ app.get('/blockchain/mine', async function (_: Request, res: Response) {
       recipient: nodeAddress,
     },
   };
-
   await axios(requestOptions);
-
   res.json({
     note: 'New block mined & broadcasted successfully',
     block: newBlock,
@@ -121,7 +114,6 @@ app.post('/blockchain/register-and-broadcast-node', function (req: Request, res:
   if (nodeNotAlreadyPresent && notCurrentNode) {
     coin.networkNodes.push(newNodeUrl);
   }
-
   const registerNodesPromises: AxiosPromise[] = [];
   coin.networkNodes.forEach((networkNodeUrl) => {
     const requestOptions: AxiosRequestConfig = {
@@ -131,7 +123,6 @@ app.post('/blockchain/register-and-broadcast-node', function (req: Request, res:
     };
     registerNodesPromises.push(axios(requestOptions));
   });
-
   Promise.all(registerNodesPromises)
     .then((_) => {
       const bulkRegisterOptions: AxiosRequestConfig = {
