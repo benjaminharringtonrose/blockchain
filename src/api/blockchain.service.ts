@@ -1,17 +1,13 @@
 import axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
 import { injectable } from 'inversify';
-import { nodeAddress } from '../bootstrap';
+import { nodeAddress } from './bootstrap';
 import { Blockchain } from './Blockchain';
 import { IBlock, ICreateNewTransaction, ICurrentBlockTransactions, ITransaction } from '../types';
-
-export enum NewBlock {
-  accepted = 'accepted',
-  rejected = 'rejected',
-}
 
 @injectable()
 export class BlockchainService {
   private coin: Blockchain;
+
   constructor() {
     this.coin = new Blockchain();
   }
