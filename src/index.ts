@@ -57,4 +57,4 @@ const bc1 = {
   ],
 };
 
-console.log('VALID: ', coin.chainIsValid(bc1.chain));
+// console.log('VALID: ', coin.chainIsValid(bc1.chain));

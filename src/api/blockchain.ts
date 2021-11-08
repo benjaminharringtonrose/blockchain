@@ -15,7 +15,6 @@ const currentNodeUrl = process.argv[3];
 export class Blockchain {
   public chain: IBlock[];
   public pendingTransactions: ITransaction[];
-
   public currentNodeUrl: string;
   public networkNodes: string[];
 

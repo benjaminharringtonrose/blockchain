@@ -24,6 +24,7 @@
     "inversify-express-utils": "6.4.3",
     "js-sha256": "0.9.0",
     "nodemon": "2.0.14",
+    "openapi-client-axios": "^4.2.0",
     "reflect-metadata": "0.1.13",
     "request-promise": "4.2.6",
     "uuid": "8.3.2"
